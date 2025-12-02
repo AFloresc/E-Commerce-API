@@ -1,6 +1,7 @@
 package main
 
 import (
+	"e-commerce-api/internal/auth"
 	"log"
 	"net/http"
 	"os"
@@ -32,6 +33,7 @@ func main() {
 	// Aquí se montarán los routers de cada módulo
 	// ej: r.Mount("/auth", auth.Router())
 	//     r.Mount("/products", product.Router())
+	r.Mount("/auth", auth.Router())
 
 	log.Printf("Servidor escuchando en http://localhost:%s", port)
 	err := http.ListenAndServe(":"+port, r)
