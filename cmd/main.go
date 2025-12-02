@@ -3,6 +3,7 @@ package main
 import (
 	"e-commerce-api/internal/auth"
 	"e-commerce-api/internal/cart"
+	"e-commerce-api/internal/payment"
 	"e-commerce-api/internal/product"
 	"log"
 	"net/http"
@@ -38,6 +39,8 @@ func main() {
 	r.Mount("/auth", auth.Router())
 	r.Mount("/products", product.Router())
 	r.Mount("/cart", cart.Router())
+	payment.InitStripe()
+	r.Mount("/payment", payment.Router())
 
 	log.Printf("Servidor escuchando en http://localhost:%s", port)
 	err := http.ListenAndServe(":"+port, r)
