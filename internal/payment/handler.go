@@ -2,6 +2,7 @@ package payment
 
 import (
 	"e-commerce-api/internal/cart"
+	"e-commerce-api/internal/product"
 	"e-commerce-api/middleware"
 	"encoding/json"
 	"net/http"
@@ -14,7 +15,17 @@ func CheckoutHandler(w http.ResponseWriter, r *http.Request) {
 	// Convertir carrito a formato Stripe
 	items := []map[string]interface{}{}
 	for _, item := range c.Items {
-		// Aquí deberías obtener datos reales del producto desde product service
+		// Validar producto contra el servicio de productos
+		p, err := product.GetProduct(item.ProductID)
+		if err != nil {
+			http.Error(w, "Producto inválido en carrito", http.StatusBadRequest)
+			return
+		}
+		if item.Quantity > p.Stock {
+			http.Error(w, "Cantidad supera stock disponible", http.StatusBadRequest)
+			return
+		}
+
 		items = append(items, map[string]interface{}{
 			"name":     item.ProductID,
 			"price":    10.0, // placeholder, reemplazar con precio real
