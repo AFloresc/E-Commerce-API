@@ -33,14 +33,16 @@ func main() {
 		w.Write([]byte("Bienvenido a la E-Commerce API 🚀"))
 	})
 
+	repo := product.NewProductRepo()
+	paymentService := payment.NewPaymentService(repo)
+
 	// Aquí se montarán los routers de cada módulo
 	// ej: r.Mount("/auth", auth.Router())
 	//     r.Mount("/products", product.Router())
 	r.Mount("/auth", auth.Router())
-	r.Mount("/products", product.Router())
+	r.Mount("/products", product.Router(repo))
 	r.Mount("/cart", cart.Router())
-	payment.InitStripe()
-	r.Mount("/payment", payment.Router())
+	r.Mount("/payment", payment.Router(paymentService))
 
 	log.Printf("Servidor escuchando en http://localhost:%s", port)
 	err := http.ListenAndServe(":"+port, r)
