@@ -9,9 +9,15 @@ import (
 func Router(service *PaymentService) chi.Router {
 	h := NewHandler(service)
 	r := chi.NewRouter()
-	r.Use(middleware.JWTAuth)
 
-	r.Post("/checkout", h.CheckoutHandler)
+	// Checkout protegido
+	r.Group(func(r chi.Router) {
+		r.Use(middleware.JWTAuth)
+		r.Post("/checkout", h.CheckoutHandler)
+	})
+
+	// Webhook público (Stripe necesita acceso sin JWT)
+	r.Post("/webhook", h.WebhookHandler)
 
 	return r
 }
