@@ -7,13 +7,21 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-func ListHandler(w http.ResponseWriter, r *http.Request) {
-	json.NewEncoder(w).Encode(ListProducts())
+type Handler struct {
+	Repo *ProductRepo
 }
 
-func GetHandler(w http.ResponseWriter, r *http.Request) {
+func NewHandler(repo *ProductRepo) *Handler {
+	return &Handler{Repo: repo}
+}
+
+func (h *Handler) ListHandler(w http.ResponseWriter, r *http.Request) {
+	json.NewEncoder(w).Encode(h.Repo.List())
+}
+
+func (h *Handler) GetHandler(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
-	p, err := GetProduct(id)
+	p, err := h.Repo.Get(id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
@@ -21,18 +29,18 @@ func GetHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(p)
 }
 
-func CreateHandler(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) CreateHandler(w http.ResponseWriter, r *http.Request) {
 	var p Product
 	json.NewDecoder(r.Body).Decode(&p)
-	created := CreateProduct(p)
+	created := h.Repo.Create(p)
 	json.NewEncoder(w).Encode(created)
 }
 
-func UpdateHandler(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) UpdateHandler(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	var p Product
 	json.NewDecoder(r.Body).Decode(&p)
-	updated, err := UpdateProduct(id, p)
+	updated, err := h.Repo.Update(id, p)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
@@ -40,9 +48,9 @@ func UpdateHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(updated)
 }
 
-func DeleteHandler(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) DeleteHandler(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
-	err := DeleteProduct(id)
+	err := h.Repo.Delete(id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return

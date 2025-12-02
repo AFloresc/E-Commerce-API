@@ -6,11 +6,12 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-func Router() chi.Router {
+func Router(service *PaymentService) chi.Router {
+	h := NewHandler(service)
 	r := chi.NewRouter()
 	r.Use(middleware.JWTAuth)
 
-	r.Post("/checkout", CheckoutHandler)
+	r.Post("/checkout", h.CheckoutHandler)
 
 	return r
 }
